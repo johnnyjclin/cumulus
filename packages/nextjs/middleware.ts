@@ -8,17 +8,31 @@ export const middleware = paymentMiddleware(
   payTo,
   {
     "/api/payment/builder": {
-      price: "$0.01",
+      price: "$0.001",
       network,
       config: {
         description: "Access to protected content",
       },
     },
     "/payment/builder": {
-      price: "$0.01",
+      price: "$0.001",
       network,
       config: {
         description: "Access to protected content",
+      },
+    },
+    "/api/payment/cloudflare/pages": {
+      price: "$0.001",
+      network,
+      config: {
+        description: "Cloudflare Pages Deployment",
+      },
+    },
+    "/api/payment/cloudflare/worker": {
+      price: "$0.001",
+      network,
+      config: {
+        description: "Cloudflare Worker Deployment",
       },
     },
   },

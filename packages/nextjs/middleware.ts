@@ -35,6 +35,13 @@ export const middleware = paymentMiddleware(
         description: "Cloudflare Worker Deployment",
       },
     },
+    "/api/payment/google-ai/chat": {
+      price: "$0.001",
+      network,
+      config: {
+        description: "Google AI (Gemini) Text Generation",
+      },
+    },
   },
   {
     url: facilitatorUrl,

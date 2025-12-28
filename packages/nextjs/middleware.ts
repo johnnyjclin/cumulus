@@ -42,6 +42,13 @@ export const middleware = paymentMiddleware(
         description: "Google AI (Gemini) Text Generation",
       },
     },
+    "/api/payment/stability-ai/text-to-image": {
+      price: "$0.01",
+      network,
+      config: {
+        description: "Stability AI Text-to-Image Generation",
+      },
+    },
   },
   {
     url: facilitatorUrl,

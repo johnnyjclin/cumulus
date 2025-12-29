@@ -13,6 +13,11 @@ import scaffoldConfig from "~~/scaffold.config";
 
 const { onlyLocalBurnerWallet, targetNetworks } = scaffoldConfig;
 
+// `burner-connector` ships its own RainbowKit dependency tree, which can cause
+// TypeScript type incompatibilities when used directly in `connectorsForWallets`.
+// At runtime it's compatible; we cast to the wallet factory type expected by this app.
+const rainbowkitBurnerWalletCompat = rainbowkitBurnerWallet as unknown as typeof metaMaskWallet;
+
 const wallets = [
   metaMaskWallet,
   walletConnectWallet,
@@ -21,7 +26,7 @@ const wallets = [
   rainbowWallet,
   safeWallet,
   ...(!targetNetworks.some(network => network.id !== (chains.hardhat as chains.Chain).id) || !onlyLocalBurnerWallet
-    ? [rainbowkitBurnerWallet]
+    ? [rainbowkitBurnerWalletCompat]
     : []),
 ];
 

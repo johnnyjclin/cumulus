@@ -35,6 +35,9 @@ const CloudflareDeployPage: NextPage = () => {
 
       const response = await fetchWithPayment("/api/payment/cloudflare/worker", {
         method: "POST",
+        headers: {
+          "x-wallet-address": walletClient.account.address,
+        },
         body: formData,
       });
 

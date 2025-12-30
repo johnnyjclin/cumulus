@@ -5,8 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { hardhat } from "viem/chains";
-import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
-import { CreditCardIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick, useTargetNetwork } from "~~/hooks/scaffold-eth";
 
@@ -22,15 +21,23 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/",
   },
   {
-    label: "Protected Route",
-    href: "/payment/builder",
-    icon: <CreditCardIcon className="h-4 w-4" />,
+    label: "Services",
+    href: "/services",
   },
   {
-    label: "Debug Contracts",
-    href: "/debug",
-    icon: <BugAntIcon className="h-4 w-4" />,
+    label: "Dashboard",
+    href: "/dashboard",
   },
+  // {
+  //   label: "Protected Route",
+  //   href: "/payment/builder",
+  //   icon: <CreditCardIcon className="h-4 w-4" />,
+  // },
+  // {
+  //   label: "Debug Contracts",
+  //   href: "/debug",
+  //   icon: <BugAntIcon className="h-4 w-4" />,
+  // },
 ];
 
 export const HeaderMenuLinks = () => {
@@ -92,8 +99,8 @@ export const Header = () => {
             <Image alt="SE2 logo" className="cursor-pointer" fill src="/logo.svg" />
           </div>
           <div className="flex flex-col">
-            <span className="font-bold leading-tight">x402 Demo</span>
-            <span className="text-xs">SE-2 extension (HTTP 402)</span>
+            <span className="font-bold leading-tight">Cumulus</span>
+            <span className="text-xs">Cloud API Marketplace</span>
           </div>
         </Link>
         <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">

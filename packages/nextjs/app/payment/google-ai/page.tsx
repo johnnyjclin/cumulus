@@ -58,12 +58,17 @@ const GoogleAIPage: NextPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-wallet-address": walletClient.account.address,
         },
         body: JSON.stringify({
           prompt: userMessage.content,
           model,
         }),
       });
+
+      // Extract x-payment-response header for tx hash
+      const paymentResponseHeader = response.headers.get("x-payment-response");
+      console.log("x-payment-response:", paymentResponseHeader);
 
       const data = await response.json();
 
@@ -127,7 +132,7 @@ const GoogleAIPage: NextPage = () => {
                 <SparklesIcon className="h-16 w-16 mx-auto mb-4 opacity-30" />
                 <p className="text-lg font-semibold mb-2">Start a conversation</p>
                 <p className="text-sm">Ask me anything about AI, code, or creative writing!</p>
-                <p className="text-xs mt-2">Price: $0.001 per message</p>
+                <p className="text-xs mt-2">Price: $0.1 per message</p>
               </div>
             </div>
           )}
@@ -192,7 +197,7 @@ const GoogleAIPage: NextPage = () => {
               {!loading && <PaperAirplaneIcon className="h-5 w-5" />}
             </button>
           </div>
-          <p className="text-xs text-base-content/50 mt-2">💰 $0.001 per message · Protected by x402 Protocol</p>
+          <p className="text-xs text-base-content/50 mt-2">💰 $0.1 per message · Protected by x402 Protocol</p>
         </div>
       </div>
     </div>

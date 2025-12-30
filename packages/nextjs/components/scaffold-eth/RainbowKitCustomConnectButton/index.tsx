@@ -6,8 +6,8 @@ import { AddressQRCodeModal } from "./AddressQRCodeModal";
 import { RevealBurnerPKModal } from "./RevealBurnerPKModal";
 import { WrongNetworkDropdown } from "./WrongNetworkDropdown";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Balance } from "@scaffold-ui/components";
 import { Address } from "viem";
+import { USDCBalance } from "~~/components/scaffold-eth/USDCBalance";
 import { useNetworkColor } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
@@ -45,7 +45,7 @@ export const RainbowKitCustomConnectButton = () => {
               return (
                 <>
                   <div className="flex flex-col items-center mr-2">
-                    <Balance
+                    <USDCBalance
                       address={account.address as Address}
                       style={{
                         minHeight: "0",

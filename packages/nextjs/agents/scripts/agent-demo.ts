@@ -39,7 +39,7 @@ async function generateImage(description: string, paymentFetch: any) {
     }
 
     console.log("   ✅ Image generated");
-    console.log(`   💵 Cost: $0.01 USDC\n`);
+    console.log(`   💵 Cost: $0.15 USDC\n`);
 
     return `data:image/png;base64,${data.image}`;
   } catch (error: any) {
@@ -81,7 +81,7 @@ async function generateContent(prompt: string, paymentFetch: any) {
     }
 
     console.log("   ✅ Content generated");
-    console.log(`   💵 Cost: $0.001 USDC\n`);
+    console.log(`   💵 Cost: $0.1 USDC\n`);
 
     // Clean up markdown code blocks if present
     let cleanedResponse = data.response;
@@ -142,7 +142,7 @@ export default {
     }
 
     console.log("   ✅ Deployed successfully");
-    console.log(`   💵 Cost: $0.001 USDC\n`);
+    console.log(`   💵 Cost: $0.05 USDC\n`);
 
     return data.url;
   } catch (error: any) {
@@ -201,11 +201,11 @@ async function buildAndDeployWebsite(description: string, paymentFetch: any) {
     console.log(`🌐 Live URL: ${deploymentUrl}`);
     console.log(`⏱️  Duration: ${duration}s`);
     console.log("\n💰 Total Cost Breakdown:");
-    console.log("   - Stability AI (Image):    $0.010");
-    console.log("   - Google AI (Content):     $0.001");
-    console.log("   - Cloudflare (Deploy):     $0.001");
+    console.log("   - Stability AI (Image):    $0.150");
+    console.log("   - Google AI (Content):     $0.100");
+    console.log("   - Cloudflare (Deploy):     $0.050");
     console.log("   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log("   Total:                     $0.012 USDC");
+    console.log("   Total:                     $0.300 USDC");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     return deploymentUrl;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import type { NextPage } from "next";
 import { useWalletClient } from "wagmi";
 import { wrapFetchWithPayment } from "x402-fetch";
@@ -59,6 +60,7 @@ const StabilityAIPage: NextPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-wallet-address": walletClient.account.address,
         },
         body: JSON.stringify({
           prompt: userMessage.content,
@@ -146,7 +148,7 @@ const StabilityAIPage: NextPage = () => {
                 <PhotoIcon className="h-16 w-16 mx-auto mb-4 opacity-30" />
                 <p className="text-lg font-semibold mb-2">Create your first image</p>
                 <p className="text-sm">Describe what you want to see and AI will generate it!</p>
-                <p className="text-xs mt-2">Price: $0.01 per image</p>
+                <p className="text-xs mt-2">Price: $0.15 per image</p>
               </div>
             </div>
           )}
@@ -164,7 +166,14 @@ const StabilityAIPage: NextPage = () => {
                   </div>
                   {message.imageUrl && (
                     <div className="rounded-lg overflow-hidden">
-                      <img src={message.imageUrl} alt="Generated" className="w-full h-auto" />
+                      <Image
+                        src={message.imageUrl}
+                        alt="Generated"
+                        className="w-full h-auto"
+                        width={400}
+                        height={192}
+                        unoptimized
+                      />
                     </div>
                   )}
                 </div>
@@ -213,7 +222,7 @@ const StabilityAIPage: NextPage = () => {
               {!loading && <PaperAirplaneIcon className="h-5 w-5" />}
             </button>
           </div>
-          <p className="text-xs text-base-content/50 mt-2">💰 $0.01 per image · Protected by x402 Protocol</p>
+          <p className="text-xs text-base-content/50 mt-2">💰 $0.15 per image · Protected by x402 Protocol</p>
         </div>
       </div>
     </div>

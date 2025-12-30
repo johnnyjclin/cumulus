@@ -7,43 +7,22 @@ const network = process.env.NETWORK as Network;
 export const middleware = paymentMiddleware(
   payTo,
   {
-    "/api/payment/builder": {
-      price: "$0.001",
-      network,
-      config: {
-        description: "Access to protected content",
-      },
-    },
-    "/payment/builder": {
-      price: "$0.001",
-      network,
-      config: {
-        description: "Access to protected content",
-      },
-    },
-    "/api/payment/cloudflare/pages": {
-      price: "$0.001",
-      network,
-      config: {
-        description: "Cloudflare Pages Deployment",
-      },
-    },
     "/api/payment/cloudflare/worker": {
-      price: "$0.001",
+      price: "$0.005",
       network,
       config: {
         description: "Cloudflare Worker Deployment",
       },
     },
     "/api/payment/google-ai/chat": {
-      price: "$0.001",
+      price: "$0.1",
       network,
       config: {
         description: "Google AI (Gemini) Text Generation",
       },
     },
     "/api/payment/stability-ai/text-to-image": {
-      price: "$0.01",
+      price: "$0.15",
       network,
       config: {
         description: "Stability AI Text-to-Image Generation",

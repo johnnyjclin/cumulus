@@ -1,15 +1,47 @@
 import { NextResponse } from "next/server";
 import JSZip from "jszip";
+import { checkUserBudget, recordPaymentOnChain } from "~~/utils/budgetManager";
+import { extractPaymentInfo } from "~~/utils/paymentHelpers";
+import { recordPayment } from "~~/utils/receiptManager";
 
 /**
  * Cloudflare Worker Deployment API
  * Protected by x402 middleware.
  */
 export async function POST(request: Request) {
+  const startTime = Date.now();
+
   try {
     const formData = await request.formData();
     const scriptName = formData.get("scriptName") as string;
     const file = formData.get("file") as File;
+
+    // Extract payment info from request
+    const paymentInfo = extractPaymentInfo(request);
+
+    // Check on-chain budget before processing
+    try {
+      const budgetCheck = await checkUserBudget(paymentInfo.walletAddress, "$0.005");
+      if (!budgetCheck.allowed) {
+        return NextResponse.json(
+          {
+            error: "Budget limit exceeded",
+            message: `You have reached your on-chain spending limit. Spent: $${budgetCheck.spent} / $${budgetCheck.limit} USDC. Please contact support to increase your limit.`,
+            budgetInfo: {
+              spent: budgetCheck.spent,
+              limit: budgetCheck.limit,
+              remaining: budgetCheck.remaining,
+              utilization: budgetCheck.utilization,
+              requestedAmount: "0.005",
+            },
+          },
+          { status: 402 },
+        );
+      }
+    } catch (budgetError) {
+      console.error("Budget check error:", budgetError);
+      // Continue with payment if budget check fails
+    }
 
     // Validate script name (lowercase, alphanumeric, hyphens)
     const nameRegex = /^[a-z0-9-]+$/;
@@ -117,14 +149,68 @@ export async function POST(request: Request) {
     const subdomainData = await subdomainResponse.json();
     const subdomain = subdomainData.result?.subdomain || "your-subdomain";
 
+    const workerUrl = `https://${scriptName}.${subdomain}.workers.dev`;
+
+    const responseTime = Date.now() - startTime;
+
+    // Record payment receipt to database with deployment info
+    await recordPayment({
+      txHash: paymentInfo.txHash,
+      walletAddress: paymentInfo.walletAddress,
+      amount: "$0.1",
+      resource: "/api/payment/cloudflare/worker",
+      description: "Cloudflare Worker Deployment",
+      network: process.env.NETWORK || "base-sepolia",
+      authorization: paymentInfo.authorization ?? undefined,
+      metadata: {
+        requestBody: { scriptName },
+        response: {
+          deployUrl: workerUrl,
+          scriptName: scriptName,
+          subdomain: subdomain,
+        },
+        deployment: {
+          projectName: scriptName,
+          deployUrl: workerUrl,
+          version: new Date().toISOString(), // Use timestamp as version
+          cloudflareAccountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+          status: "deployed",
+        },
+        responseStatus: 200,
+        responseTime,
+      },
+    });
+
+    // Record payment on-chain to BudgetManager contract
+    try {
+      const onChainResult = await recordPaymentOnChain(paymentInfo.walletAddress, "$0.005");
+      if (!onChainResult.success) {
+        console.warn("Failed to record payment on-chain:", onChainResult.error);
+      } else {
+        console.log("✅ Payment recorded on-chain:", onChainResult.txHash);
+      }
+    } catch (onChainError) {
+      console.error("On-chain recording error:", onChainError);
+    }
+
     return NextResponse.json({
       message: "Worker deployed successfully!",
-      url: `https://${scriptName}.${subdomain}.workers.dev`,
+      url: workerUrl,
       scriptName: scriptName,
-      receipt: "x402-payment-confirmed",
+      receipt: {
+        txHash: paymentInfo.txHash,
+        amount: "$0.1",
+        timestamp: new Date().toISOString(),
+      },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Worker deployment error:", error);
-    return NextResponse.json({ error: "Internal Server Error", details: error.message }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    );
   }
 }

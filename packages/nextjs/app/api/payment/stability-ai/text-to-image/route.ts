@@ -127,7 +127,7 @@ export async function POST(request: Request) {
 
     // Record payment on-chain to BudgetManager contract
     try {
-      const onChainResult = await recordPaymentOnChain(paymentInfo.walletAddress, "$0.15");
+      const onChainResult = await recordPaymentOnChain(paymentInfo.walletAddress, "0.15");
       if (!onChainResult.success) {
         console.warn("Failed to record payment on-chain:", onChainResult.error);
       } else {

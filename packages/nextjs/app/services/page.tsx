@@ -9,6 +9,7 @@ import {
   RocketLaunchIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
+import { CLOUDFLARE_WORKER_API_AMOUNT, GOOGLE_AI_API_AMOUNT, STABILITY_API_AMOUNT } from "~~/constants";
 
 interface Service {
   id: string;
@@ -27,7 +28,7 @@ const services: Service[] = [
     name: "Cloudflare Workers",
     description: "Deploy serverless functions to the edge in seconds",
     icon: CloudArrowUpIcon,
-    price: "$0.05",
+    price: `$${CLOUDFLARE_WORKER_API_AMOUNT}`,
     path: "/payment/cloudflare",
     category: "Cloud",
     features: ["Instant deployment", "Global CDN", "ZIP upload support", "workers.dev subdomain"],
@@ -37,7 +38,7 @@ const services: Service[] = [
     name: "Google AI (Gemini)",
     description: "Advanced text generation with Gemini models",
     icon: ChatBubbleLeftRightIcon,
-    price: "$0.1",
+    price: `$${GOOGLE_AI_API_AMOUNT}`,
     path: "/payment/google-ai",
     category: "AI",
     features: ["Multiple models", "Real-time chat", "Context-aware", "Fast responses"],
@@ -47,7 +48,7 @@ const services: Service[] = [
     name: "Stability AI",
     description: "Generate stunning images from text descriptions",
     icon: PhotoIcon,
-    price: "$0.15",
+    price: `$${STABILITY_API_AMOUNT}`,
     path: "/payment/stability-ai",
     category: "AI",
     features: ["SD3 models", "Multiple aspect ratios", "High quality", "Fast generation"],

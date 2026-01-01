@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import JSZip from "jszip";
+import { CLOUDFLARE_WORKER_API_AMOUNT, STABILITY_API_AMOUNT } from "~~/constants";
 import { checkUserBudget, recordPaymentOnChain } from "~~/utils/budgetManager";
 import { extractPaymentInfo } from "~~/utils/paymentHelpers";
 import { recordPayment } from "~~/utils/receiptManager";
@@ -157,7 +158,7 @@ export async function POST(request: Request) {
     await recordPayment({
       txHash: paymentInfo.txHash,
       walletAddress: paymentInfo.walletAddress,
-      amount: "$0.1",
+      amount: `${CLOUDFLARE_WORKER_API_AMOUNT}`,
       resource: "/api/payment/cloudflare/worker",
       description: "Cloudflare Worker Deployment",
       network: process.env.NETWORK || "base-sepolia",
@@ -183,7 +184,7 @@ export async function POST(request: Request) {
 
     // Record payment on-chain to BudgetManager contract
     try {
-      const onChainResult = await recordPaymentOnChain(paymentInfo.walletAddress, "$0.005");
+      const onChainResult = await recordPaymentOnChain(paymentInfo.walletAddress, STABILITY_API_AMOUNT);
       if (!onChainResult.success) {
         console.warn("Failed to record payment on-chain:", onChainResult.error);
       } else {
@@ -199,7 +200,7 @@ export async function POST(request: Request) {
       scriptName: scriptName,
       receipt: {
         txHash: paymentInfo.txHash,
-        amount: "$0.1",
+        amount: `$${CLOUDFLARE_WORKER_API_AMOUNT}`,
         timestamp: new Date().toISOString(),
       },
     });

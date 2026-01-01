@@ -77,7 +77,7 @@ export async function recordPaymentOnChain(
     const wallet = new ethers.Wallet(deployerPK, provider);
     const budgetManager = new ethers.Contract(BUDGET_MANAGER_ADDRESS, BUDGET_MANAGER_ABI, wallet);
 
-    const amountInBaseUnits = ethers.parseUnits(amountUSD.replace("$", ""), 6);
+    const amountInBaseUnits = ethers.parseUnits(amountUSD, 6);
 
     const tx = await budgetManager.recordPayment(userAddress, amountInBaseUnits);
     const receipt = await tx.wait();

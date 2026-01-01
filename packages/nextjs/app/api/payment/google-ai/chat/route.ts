@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { GOOGLE_AI_API_AMOUNT } from "~~/constants";
 import { checkUserBudget, recordPaymentOnChain } from "~~/utils/budgetManager";
 import { extractPaymentInfo } from "~~/utils/paymentHelpers";
 import { recordPayment } from "~~/utils/receiptManager";
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
 
     // Check on-chain budget before processing
     try {
-      const budgetCheck = await checkUserBudget(paymentInfo.walletAddress, "$0.1");
+      const budgetCheck = await checkUserBudget(paymentInfo.walletAddress, `$${GOOGLE_AI_API_AMOUNT}`);
       if (!budgetCheck.allowed) {
         return NextResponse.json(
           {
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
               limit: budgetCheck.limit,
               remaining: budgetCheck.remaining,
               utilization: budgetCheck.utilization,
-              requestedAmount: "0.1",
+              requestedAmount: GOOGLE_AI_API_AMOUNT,
             },
           },
           { status: 402 },
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
     await recordPayment({
       txHash: paymentInfo.txHash,
       walletAddress: paymentInfo.walletAddress,
-      amount: "$0.1",
+      amount: `$${GOOGLE_AI_API_AMOUNT}`,
       resource: "/api/payment/google-ai/chat",
       description: "Google AI (Gemini) Text Generation",
       network: process.env.NETWORK || "base-sepolia",
@@ -119,7 +120,7 @@ export async function POST(request: Request) {
 
     // Record payment on-chain to BudgetManager contract
     try {
-      const onChainResult = await recordPaymentOnChain(paymentInfo.walletAddress, "$0.1");
+      const onChainResult = await recordPaymentOnChain(paymentInfo.walletAddress, GOOGLE_AI_API_AMOUNT);
       if (!onChainResult.success) {
         console.warn("Failed to record payment on-chain:", onChainResult.error);
       } else {
@@ -141,7 +142,7 @@ export async function POST(request: Request) {
       },
       receipt: {
         txHash: paymentInfo.txHash,
-        amount: "$0.1",
+        amount: `$${GOOGLE_AI_API_AMOUNT}`,
         timestamp: new Date().toISOString(),
       },
     });

@@ -1,3 +1,4 @@
+import { CLOUDFLARE_WORKER_API_AMOUNT, GOOGLE_AI_API_AMOUNT, STABILITY_API_AMOUNT } from "./constants";
 import { Network, Resource, paymentMiddleware } from "x402-next";
 
 const facilitatorUrl = process.env.NEXT_PUBLIC_FACILITATOR_URL as Resource;
@@ -8,21 +9,21 @@ export const middleware = paymentMiddleware(
   payTo,
   {
     "/api/payment/cloudflare/worker": {
-      price: "$0.005",
+      price: `$${CLOUDFLARE_WORKER_API_AMOUNT}`,
       network,
       config: {
         description: "Cloudflare Worker Deployment",
       },
     },
     "/api/payment/google-ai/chat": {
-      price: "$0.1",
+      price: `$${GOOGLE_AI_API_AMOUNT}`,
       network,
       config: {
         description: "Google AI (Gemini) Text Generation",
       },
     },
     "/api/payment/stability-ai/text-to-image": {
-      price: "$0.15",
+      price: `$${STABILITY_API_AMOUNT}`,
       network,
       config: {
         description: "Stability AI Text-to-Image Generation",

@@ -10,6 +10,7 @@ import {
   RocketLaunchIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
+import { GOOGLE_AI_API_AMOUNT, STABILITY_API_AMOUNT } from "~~/constants";
 
 const Home: NextPage = () => {
   return (
@@ -132,7 +133,7 @@ const Home: NextPage = () => {
                   <CloudArrowUpIcon className="h-12 w-12 text-primary mb-3" />
                   <h3 className="card-title">Cloudflare Workers</h3>
                   <p className="text-base-content/70 mb-3">Deploy serverless functions to the edge in seconds</p>
-                  <div className="badge badge-primary badge-lg">$0.05 per deploy</div>
+                  <div className="badge badge-primary badge-lg">${STABILITY_API_AMOUNT} per deploy</div>
                 </div>
               </div>
 
@@ -141,7 +142,7 @@ const Home: NextPage = () => {
                   <ChatBubbleLeftRightIcon className="h-12 w-12 text-secondary mb-3" />
                   <h3 className="card-title">Google AI (Gemini)</h3>
                   <p className="text-base-content/70 mb-3">Advanced text generation with multiple Gemini models</p>
-                  <div className="badge badge-secondary badge-lg">$0.1 per request</div>
+                  <div className="badge badge-secondary badge-lg">${GOOGLE_AI_API_AMOUNT} per request</div>
                 </div>
               </div>
 
@@ -150,7 +151,7 @@ const Home: NextPage = () => {
                   <PhotoIcon className="h-12 w-12 text-accent mb-3" />
                   <h3 className="card-title">Stability AI</h3>
                   <p className="text-base-content/70 mb-3">Generate high-quality images from text descriptions</p>
-                  <div className="badge badge-accent badge-lg">$0.15 per image</div>
+                  <div className="badge badge-accent badge-lg">${STABILITY_API_AMOUNT} per image</div>
                 </div>
               </div>
             </div>

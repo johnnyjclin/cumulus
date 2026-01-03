@@ -9,13 +9,14 @@ import { baseSepolia } from "viem/chains";
  */
 
 // Configuration
-const EVM_PRIVATE_KEY = process.env.EVM_PRIVATE_KEY || "";
+const AGENT_PRIVATE_KEY = process.env.AGENT_PRIVATE_KEY || "";
+const AGENT_WALLET_ADDRESS = process.env.AGENT_WALLET_ADDRESS || "";
 const GATEWAY_URL = process.env.GATEWAY_URL || "http://localhost:3000";
 
 /**
  * Step 1: Generate hero image using Stability AI
  */
-async function generateImage(description: string, paymentFetch: any) {
+async function generateImage(description: string, walletAddress: string, paymentFetch: any) {
   console.log("🎨 Step 1: Generating hero image with Stability AI...");
   console.log(`   Description: "${description}"`);
 
@@ -24,9 +25,10 @@ async function generateImage(description: string, paymentFetch: any) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-wallet-address": walletAddress,
       },
       body: JSON.stringify({
-        prompt: `Simple hero image for ${description}, low quality, not too big, less token is better`,
+        prompt: `Professional business hero image: ${description}. High-quality commercial photography, appealing presentation, good lighting, modern aesthetic. Professional ambiance, welcoming atmosphere.`,
         model: "sd3-medium",
         aspectRatio: "16:9",
       }),
@@ -51,7 +53,7 @@ async function generateImage(description: string, paymentFetch: any) {
 /**
  * Step 2: Generate web content using Google AI
  */
-async function generateContent(prompt: string, paymentFetch: any) {
+async function generateContent(prompt: string, walletAddress: string, paymentFetch: any) {
   console.log("📝 Step 2: Generating content with Google AI...");
   console.log(`   Prompt: "${prompt}"`);
 
@@ -60,16 +62,26 @@ async function generateContent(prompt: string, paymentFetch: any) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-wallet-address": walletAddress,
       },
       body: JSON.stringify({
-        prompt: `Generate a simple and clean HTML landing page for: ${prompt}. 
-                 Requirements:
-                 - Use inline CSS only (no external stylesheets)
-                 - Keep it minimal and modern
-                 - Include a hero section with id="hero-image" where I'll insert an image later
-                 - Add a simple headline, description, and CTA button
-                 - Total length should be under 100 lines
-                 Return only the HTML code without any markdown formatting.`,
+        prompt: `Generate a complete HTML landing page for: ${prompt}.
+                 
+                 Required Structure:
+                 1. HEADER: Simple navigation bar with business logo placeholder (use text logo for now)
+                 2. HERO SECTION: Full-width banner with id="hero-image" where I'll insert an image. Include business name overlay and tagline
+                 3. INTRODUCTION SECTION: About the business with placeholder for an introduction image (id="intro-image"). Include 2-3 paragraphs about offerings, atmosphere, and philosophy
+                 4. FOOTER: Contact info, hours, address, social media links
+                 
+                 Design Requirements:
+                 - Use inline CSS only (no external stylesheets or JavaScript)
+                 - Modern, clean design with appropriate brand colors
+                 - Responsive layout using flexbox
+                 - Elegant typography with good spacing
+                 - Professional business aesthetic
+                 - Keep code simple and readable (under 150 lines)
+                 
+                 Return ONLY the HTML code without any markdown formatting or code blocks.`,
         model: "gemini-2.0-flash-exp",
       }),
     });
@@ -99,7 +111,7 @@ async function generateContent(prompt: string, paymentFetch: any) {
 /**
  * Step 3: Deploy to Cloudflare Workers
  */
-async function deployToCloudflare(html: string, siteName: string, paymentFetch: any) {
+async function deployToCloudflare(html: string, siteName: string, walletAddress: string, paymentFetch: any) {
   console.log("🚀 Step 3: Deploying to Cloudflare Workers...");
   console.log(`   Site Name: ${siteName}`);
 
@@ -132,6 +144,9 @@ export default {
 
     const response = await paymentFetch(`${GATEWAY_URL}/api/payment/cloudflare/worker`, {
       method: "POST",
+      headers: {
+        "x-wallet-address": walletAddress,
+      },
       body: formData,
     });
 
@@ -154,44 +169,61 @@ export default {
 /**
  * Main flow: Automated website generation and deployment
  */
-async function buildAndDeployWebsite(description: string, paymentFetch: any) {
+async function buildAndDeployWebsite(description: string, walletAddress: string, paymentFetch: any) {
   console.log("🎬 Starting automated website deployment...");
   console.log(`📋 Task: "${description}"\n`);
 
   const startTime = Date.now();
 
   try {
-    // Step 1: Generate image first
-    const heroImage = await generateImage(description, paymentFetch);
+    // Step 1: Generate hero image
+    const heroImage = await generateImage(description, walletAddress, paymentFetch);
+
+    // Step 1.5: Generate introduction image
+    console.log("🎨 Generating introduction image...");
+    const introImage = await generateImage(
+      `${description} - interior view, inviting atmosphere, professional setting`,
+      walletAddress,
+      paymentFetch,
+    );
 
     // Step 2: Generate basic HTML structure
-    const htmlTemplate = await generateContent(description, paymentFetch);
+    const htmlTemplate = await generateContent(description, walletAddress, paymentFetch);
 
-    // Step 2.5: Inject the hero image into the HTML
-    console.log("🔧 Injecting hero image into HTML...");
+    // Step 2.5: Inject both images into the HTML
+    console.log("🔧 Injecting images into HTML...");
     let htmlContent = htmlTemplate;
 
-    // Try to find hero section and inject image
+    // Inject hero image
     if (htmlContent.includes('id="hero-image"')) {
       htmlContent = htmlContent.replace(
         'id="hero-image"',
-        `id="hero-image"><img src="${heroImage}" alt="Hero Image" style="width: 100%; max-width: 800px; height: auto; border-radius: 8px;"`,
+        `id="hero-image" style="background-image: url('${heroImage}'); background-size: cover; background-position: center;"`,
       );
     } else {
       // Fallback: inject before closing body tag
       htmlContent = htmlContent.replace(
         "</body>",
-        `<div style="text-align: center; padding: 2rem;"><img src="${heroImage}" alt="Hero Image" style="width: 100%; max-width: 800px; height: auto; border-radius: 8px;"></div></body>`,
+        `<div style="text-align: center; padding: 2rem;"><img src="${heroImage}" alt="Hero Image" style="width: 100%; height: auto;"></div></body>`,
       );
     }
-    console.log("   ✅ Image injected\n");
+
+    // Inject introduction image
+    if (htmlContent.includes('id="intro-image"')) {
+      htmlContent = htmlContent.replace(
+        'id="intro-image"',
+        `id="intro-image"><img src="${introImage}" alt="Restaurant Interior" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"`,
+      );
+    }
+
+    console.log("   ✅ Images injected\n");
 
     // Step 3: Deploy
     const siteName = description
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .substring(0, 32);
-    const deploymentUrl = await deployToCloudflare(htmlContent, siteName, paymentFetch);
+    const deploymentUrl = await deployToCloudflare(htmlContent, siteName, walletAddress, paymentFetch);
 
     // Complete
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -201,11 +233,12 @@ async function buildAndDeployWebsite(description: string, paymentFetch: any) {
     console.log(`🌐 Live URL: ${deploymentUrl}`);
     console.log(`⏱️  Duration: ${duration}s`);
     console.log("\n💰 Total Cost Breakdown:");
-    console.log("   - Stability AI (Image):    $0.150");
+    console.log("   - Stability AI (Hero):     $0.150");
+    console.log("   - Stability AI (Intro):    $0.150");
     console.log("   - Google AI (Content):     $0.100");
     console.log("   - Cloudflare (Deploy):     $0.050");
     console.log("   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log("   Total:                     $0.300 USDC");
+    console.log("   Total:                     $0.450 USDC");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     return deploymentUrl;
@@ -219,8 +252,20 @@ async function buildAndDeployWebsite(description: string, paymentFetch: any) {
  * Main function: Initialize and execute
  */
 async function main() {
-  // Create Agent wallet (using Faremeter's Base Sepolia wallet)
-  const wallet = await createLocalWallet(baseSepolia, EVM_PRIVATE_KEY);
+  // Validate configuration
+  if (!AGENT_PRIVATE_KEY) {
+    throw new Error("AGENT_PRIVATE_KEY environment variable is required");
+  }
+
+  // Create Agent wallet (using existing private key)
+  const wallet = await createLocalWallet(baseSepolia, AGENT_PRIVATE_KEY);
+
+  // Verify wallet address if provided
+  if (AGENT_WALLET_ADDRESS && wallet.address.toLowerCase() !== AGENT_WALLET_ADDRESS.toLowerCase()) {
+    console.warn(`⚠️  Warning: Wallet address mismatch`);
+    console.warn(`   Expected: ${AGENT_WALLET_ADDRESS}`);
+    console.warn(`   Actual:   ${wallet.address}`);
+  }
 
   console.log("🤖 AI Agent initialized");
   console.log(`📍 Wallet Address: ${wallet.address}`);
@@ -235,8 +280,8 @@ async function main() {
     handlers: [createPaymentHandler(wallet)],
   });
 
-  const projectDescription = process.argv[2] || "AI-powered landing page builder";
-  const url = await buildAndDeployWebsite(projectDescription, paymentFetch);
+  const projectDescription = process.argv[2] || "Modern Coffee Shop - Artisan Roastery & Cafe";
+  const url = await buildAndDeployWebsite(projectDescription, wallet.address, paymentFetch);
   console.log(`\n✨ Success! Visit: ${url}`);
 }
 

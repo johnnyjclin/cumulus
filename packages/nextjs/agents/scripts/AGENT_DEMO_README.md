@@ -1,16 +1,26 @@
-# AI Agent Demo
+# AI Agent Demo - Autonomous Payment System
 
-展示使用 **Faremeter + Base Network** 實現完整的 Agentic Payment 流程。
+This demo showcases a complete **Agentic Payment** workflow using **Faremeter + Base Network**.
 
-AI Agent 會自動：
+The AI Agent autonomously:
 
-1. 使用 Google AI (Gemini) 生成網頁內容
-2. 使用 Stability AI 生成 Hero 圖片
-3. 部署到 Cloudflare Workers
+1. Generates web content using Google AI (Gemini)
+2. Creates images using Stability AI
+3. Deploys websites to Cloudflare Workers
 
-**重點**：整個過程無需人工授權錢包交易，Agent 自動使用 EIP-3009 gasless USDC transfers 支付所有費用。
+**Key Feature**: The entire process requires no human wallet approval - the agent automatically handles all payments using EIP-3009 gasless USDC transfers.
 
-## 技術架構
+## Two Demo Modes
+
+### 1. Scripted Agent Demo (`run-agent-demo.sh`)
+Pre-programmed workflow that generates 2 images, HTML content, and deploys automatically.
+
+### 2. Interactive AI Agent (`run-interactive-agent.sh`)
+Natural language interface where Google AI orchestrates which APIs to call based on your prompts.
+
+---
+
+## Technical Architecture
 
 ### Faremeter + Base Network
 
@@ -21,77 +31,141 @@ AI Agent 會自動：
 - **Wallet**: `@faremeter/wallet-evm` with local private key
 - **Payment Handler**: `@faremeter/payment-evm/exact` for precise amount transfers
 
-### 費用結構
+### Pricing
 
-- Google AI (Content Generation): **$0.001 USDC**
-- Stability AI (Image Generation): **$0.010 USDC**
-- Cloudflare (Deployment): **$0.001 USDC**
-- **Total**: **$0.012 USDC** per deployment
+- Google AI (Content Generation): **$0.10 USDC**
+- Stability AI (Image Generation): **$0.15 USDC** each
+- Cloudflare (Deployment): **$0.05 USDC**
+- **Total (2 images + HTML + deploy)**: **$0.45 USDC**
 
-## 前置需求
+### Optimizations (Latest)
 
-### 1. 安裝依賴
+To avoid Gemini's MAX_TOKENS limit (2048 output tokens):
+- **Limited to 2 images** (hero + about) instead of 3-5
+- **4 core sections** (Hero, About, Services, Contact) instead of 7+
+- **500-line HTML limit** instead of 1200
+- **Simplified prompt**: ~150 tokens (vs 462 previously)
+- **Output tokens**: ~1200-1500 (well under 2048 limit)
+
+---
+
+## Prerequisites
+
+### 1. Install Dependencies
 
 ```bash
 yarn workspace @se-2/nextjs add @faremeter/fetch @faremeter/wallet-evm @faremeter/payment-evm viem tsx
 ```
 
-### 2. 準備 Agent 錢包
+### 2. Prepare Agent Wallet
 
 ```bash
-# 創建新錢包
+# Create new wallet
 node -e "console.log(require('ethers').Wallet.createRandom().privateKey)"
 
-# 或使用現有錢包
+# Or use existing wallet
 export EVM_PRIVATE_KEY=0x...
 ```
 
-### 3. 獲取 Base Sepolia Testnet USDC
+### 3. Get Base Sepolia Testnet USDC
 
-1. 從 [Base Sepolia Faucet](https://www.coinbase.com/faucets/base-ethereum-goerli-faucet) 獲取 ETH
-2. 從 [Circle USDC Faucet](https://faucet.circle.com/) 獲取 USDC
-3. 確保錢包有至少 $0.05 USDC 用於測試
+1. Get ETH from [Base Sepolia Faucet](https://www.coinbase.com/faucets/base-ethereum-goerli-faucet)
+2. Get USDC from [Circle USDC Faucet](https://faucet.circle.com/)
+3. Ensure wallet has at least $0.50 USDC for testing
 
-### 4. 配置環境變數
+### 4. Configure Environment Variables
 
 ```bash
-# Agent 錢包私鑰 (Base Sepolia)
+# Agent wallet private key (Base Sepolia)
 export EVM_PRIVATE_KEY=0x...
 
-# Gateway URL (本地開發)
+# Gateway URL (local development)
 export GATEWAY_URL=http://localhost:3000
 
-# API Keys (已在 .env.local 配置)
+# API Keys (configured in .env.local)
 # GOOGLE_AI_API_KEY=...
-# STABILITY_AI_API_KEY=...
+# STABILITY_API_KEY=...
 # CLOUDFLARE_ACCOUNT_ID=...
 # CLOUDFLARE_API_TOKEN=...
 ```
 
-## 使用方式
+---
 
-### 啟動 Gateway
+## Usage
+
+### Start the Gateway
 
 ```bash
 cd packages/nextjs
 yarn dev
 ```
 
-### 執行 Agent Demo
+### Option 1: Scripted Agent Demo
+
+Pre-programmed workflow with fixed steps:
 
 ```bash
-# 使用預設描述
+# Default description
 cd packages/nextjs
-./scripts/run-agent-demo.sh
+./agents/scripts/run-agent-demo.sh
 
-# 自訂網站描述
-./scripts/run-agent-demo.sh "Web3 gaming platform landing page"
+# Custom website description
+./agents/scripts/run-agent-demo.sh "Modern Italian Restaurant - Fine Dining"
 
-# 或直接執行 TypeScript
-tsx scripts/agent-demo.ts "DeFi protocol landing page"
+# Or run TypeScript directly
+tsx agents/scripts/agent-demo.ts "Luxury Spa & Wellness Center"
 ```
 
-## 執行流程
+**What it does:**
+1. Generates hero image ($0.15)
+2. Generates about image ($0.15)
+3. Generates HTML content ($0.10)
+4. Injects images into HTML
+5. Deploys to Cloudflare Workers ($0.05)
+
+**Total: $0.45 USDC**
+
+### Option 2: Interactive AI Agent
+
+Natural language interface with AI decision-making:
+
+```bash
+cd packages/nextjs
+export AGENT_PRIVATE_KEY=0x...  # Your funded wallet
+./agents/scripts/run-interactive-agent.sh
+```
+
+**How it works:**
+1. You type a natural language prompt
+2. Google AI analyzes your request
+3. AI autonomously decides which tools to call:
+   - `generate_image` - Create images ($0.15 each)
+   - `generate_content` - Create HTML ($0.10)
+   - `deploy_website` - Deploy to Cloudflare ($0.05)
+4. Agent executes and pays for each API call automatically
+5. You receive the final result (deployed URL or assets)
+6. Type `exit` to quit
+
+**Example Prompts:**
+
+```
+# Simple
+Create a complete Italian restaurant website with images and deploy it
+
+# Detailed
+Build a luxury spa website with calming hero image, about section with interior photo, services showcase, and contact form. Deploy to Cloudflare.
+
+# Comprehensive
+I need a professional landing page for "Bella Trattoria - Authentic Tuscan Cuisine". Generate a hero image showing elegant Italian dining ambiance, an about image with rustic interior, create HTML with hero section, about our family recipes, signature dishes section, and contact form. Deploy everything.
+```
+
+**Cost varies:** $0.30 - $0.45 depending on AI's decision
+
+---
+
+## Execution Flow
+
+### Scripted Demo Output:
 
 ```
 🤖 AI Agent initialized
@@ -101,44 +175,89 @@ tsx scripts/agent-demo.ts "DeFi protocol landing page"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🎬 Starting automated website deployment...
-📋 Task: "AI-powered landing page builder"
+📋 Task: "Modern Italian Restaurant"
 
-📝 Step 1: Generating content with Google AI...
-   Prompt: "AI-powered landing page builder"
-   [x402 Payment] Paying $0.001 USDC via EIP-3009...
-   ✅ Content generated
-   💵 Cost: $0.001 USDC
+🎨 Step 1: Generating hero image...
+   [x402 Payment] Paying $0.15 USDC via EIP-3009...
+   ✅ Image generated (Hero banner)
+   💵 Cost: $0.15 USDC
 
-🎨 Step 2: Generating hero image with Stability AI...
-   Description: "AI-powered landing page builder"
-   [x402 Payment] Paying $0.010 USDC via EIP-3009...
-   ✅ Image generated
-   💵 Cost: $0.01 USDC
+🎨 Step 2: Generating about image...
+   [x402 Payment] Paying $0.15 USDC via EIP-3009...
+   ✅ Image generated (About section)
+   💵 Cost: $0.15 USDC
 
-🚀 Step 3: Deploying to Cloudflare Workers...
-   Site Name: ai-powered-landing-page-builder
-   [x402 Payment] Paying $0.001 USDC via EIP-3009...
+📝 Step 3: Generating HTML content...
+   [x402 Payment] Paying $0.10 USDC via EIP-3009...
+   ✅ Content generated (4 sections, ~500 lines)
+   💵 Cost: $0.10 USDC
+
+🚀 Step 4: Deploying to Cloudflare...
+   [x402 Payment] Paying $0.05 USDC via EIP-3009...
    ✅ Deployed successfully
-   💵 Cost: $0.001 USDC
+   💵 Cost: $0.05 USDC
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎉 Deployment Complete!
 
-🌐 Live URL: https://ai-powered-landing-page-builder.workers.dev
-⏱️  Duration: 12.34s
+🌐 Live URL: https://modern-italian-restaurant.workers.dev
+⏱️  Duration: 35.2s
 
 💰 Total Cost Breakdown:
-   - Google AI (Content):     $0.001
-   - Stability AI (Image):    $0.010
-   - Cloudflare (Deploy):     $0.001
+   - Stability AI (2 images):  $0.30
+   - Google AI (HTML):         $0.10
+   - Cloudflare (Deploy):      $0.05
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   Total:                     $0.012 USDC
+   Total:                      $0.45 USDC
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-## 代碼架構
+### Interactive Agent Output:
 
-### Agent Script (`scripts/agent-demo.ts`)
+```
+🤖 Interactive AI Agent
+Type your request (or 'exit' to quit):
+> Create a sushi restaurant website with images and deploy it
+
+🧠 AI Planning: Analyzing request...
+   ✅ Plan created: 4 steps, estimated $0.45 USDC
+
+📋 Execution Plan:
+   1. generate_image: Hero banner (sushi bar ambiance)
+   2. generate_image: About section (chef preparing sushi)
+   3. generate_content: HTML landing page
+   4. deploy_website: Cloudflare Workers
+
+💰 Estimated Cost: $0.45 USDC
+Proceed? (y/n): y
+
+🎨 Generating hero image...
+   ✅ Done ($0.15)
+
+🎨 Generating about image...
+   ✅ Done ($0.15)
+
+📝 Generating HTML content...
+   ✅ Done ($0.10)
+
+🚀 Deploying to Cloudflare...
+   ✅ Done ($0.05)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Task Complete!
+
+🌐 Live URL: https://sushi-restaurant.workers.dev
+💰 Total Spent: $0.45 USDC
+
+Type your request (or 'exit' to quit):
+>
+```
+
+---
+
+## Code Architecture
+
+### Agent Script (`agents/scripts/agent-demo.ts`)
 
 ```typescript
 import { wrap as wrapFetch } from "@faremeter/fetch";
@@ -146,15 +265,15 @@ import { createPaymentHandler } from "@faremeter/payment-evm/exact";
 import { createLocalWallet } from "@faremeter/wallet-evm";
 import { baseSepolia } from "viem/chains";
 
-// 創建 Base Sepolia wallet
+// Create Base Sepolia wallet
 const wallet = await createLocalWallet(baseSepolia, EVM_PRIVATE_KEY);
 
-// 包裝 fetch 使其支持 x402 自動支付
+// Wrap fetch to support x402 automatic payments
 const paymentFetch = wrapFetch(fetch, {
   handlers: [createPaymentHandler(wallet)],
 });
 
-// 使用 paymentFetch 發送請求，自動處理 402 付款
+// Use paymentFetch to send request, automatically handles 402 payment
 const response = await paymentFetch(`${GATEWAY_URL}/api/payment/google-ai/chat`, {
   method: "POST",
   body: JSON.stringify({ prompt, model }),
@@ -163,64 +282,84 @@ const response = await paymentFetch(`${GATEWAY_URL}/api/payment/google-ai/chat`,
 
 ### Payment Flow (EIP-3009)
 
-1. Agent 發送請求到 Gateway
-2. Gateway 返回 `402 Payment Required` + payment details
-3. Faremeter handler 自動：
-   - 構建 EIP-712 typed data
-   - 使用 wallet 簽署 authorization
-   - 將 signature 加入 request headers
-   - 重試原始請求
-4. Gateway facilitator 驗證 signature 並執行 gasless USDC transfer
-5. 返回服務結果
+1. Agent sends request to Gateway
+2. Gateway returns `402 Payment Required` + payment details
+3. Faremeter handler automatically:
+   - Builds EIP-712 typed data
+   - Signs authorization with wallet
+   - Adds signature to request headers
+   - Retries original request
+4. Gateway facilitator verifies signature and executes gasless USDC transfer
+5. Returns service result
 
-## 關鍵特性
+---
 
-### ✅ 真正的 Agentic Payment
+## Key Features
 
-- Agent 完全自主決定和執行支付
-- 無需人工點擊錢包彈窗
-- 使用 EIP-3009 實現 gasless transfers
+### ✅ True Agentic Payment
 
-### ✅ 微支付友好
+- Agent fully autonomously decides and executes payments
+- No human wallet popup clicks required
+- Uses EIP-3009 for gasless transfers
 
-- 支持 $0.001 級別的小額支付
-- 透過 facilitator 批次處理降低 gas 成本
-- 使用穩定幣 USDC 避免價格波動
+### ✅ Micropayment Friendly
 
-### ✅ 安全且透明
+- Supports payments as low as $0.05
+- Batch processing via facilitator reduces gas costs
+- Uses stablecoin USDC to avoid price volatility
 
-- EIP-712 typed data 確保簽名安全
-- 每筆支付都有明確的金額和收款人
-- Agent 私鑰本地儲存，不上傳到伺服器
+### ✅ Secure & Transparent
 
-## 故障排除
+- EIP-712 typed data ensures signature security
+- Each payment has explicit amount and recipient
+- Agent private key stored locally, never uploaded to server
 
-### Agent 錢包餘額不足
+### ✅ AI Orchestration (Interactive Mode)
+
+- Google AI analyzes natural language prompts
+- Autonomously decides which APIs to call
+- Provides cost estimates before execution
+- True autonomous decision-making
+
+---
+
+## Troubleshooting
+
+### Insufficient Agent Wallet Balance
 
 ```bash
-# 檢查餘額
+# Check balance
 cast balance $WALLET_ADDRESS --rpc-url https://sepolia.base.org
 
-# 獲取測試 USDC
-# 訪問 https://faucet.circle.com/
+# Get test USDC
+# Visit https://faucet.circle.com/
 ```
 
-### Payment 失敗
+### Payment Failure
 
-- 檢查 Gateway 是否正常運行 (`yarn dev`)
-- 確認環境變數 `EVM_PRIVATE_KEY` 已設置
-- 確認錢包有足夠的 USDC 餘額
-- 查看 Gateway logs 檢查 facilitator 配置
+- Check if Gateway is running (`yarn dev`)
+- Confirm `EVM_PRIVATE_KEY` environment variable is set
+- Verify wallet has sufficient USDC balance
+- Check Gateway logs for facilitator configuration
 
-### 網路連接問題
+### Network Connection Issues
 
 ```bash
-# 測試 Gateway 連接
+# Test Gateway connection
 curl $GATEWAY_URL/api/health
 
-# 測試 Base Sepolia RPC
+# Test Base Sepolia RPC
 curl https://sepolia.base.org \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
 ```
+
+### MAX_TOKENS Error (Fixed)
+
+If you see `finishReason: 'MAX_TOKENS'` in logs:
+- ✅ **Already fixed** in latest version
+- System now limits to 2 images and 4 sections
+- Prompt optimized to ~150 tokens (from 462)
+- HTML limited to 500 lines (from 1200)
+- Output stays under 1500 tokens (well below 2048 limit)

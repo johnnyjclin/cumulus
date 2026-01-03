@@ -39,17 +39,6 @@ All paid routes are enforced by middleware in [packages/nextjs/middleware.ts](pa
 - `POST /api/payment/google-ai/chat` — `$0.1`
 - `POST /api/payment/stability-ai/text-to-image` — `$0.15`
 
-## 2-minute live demo (submission requirement)
-
-- **Demo URL:** <ADD_PUBLIC_DEMO_URL>
-- **Video (2 minutes):** <ADD_VIDEO_URL>
-
-Suggested demo flow:
-1. Open `http://localhost:3000/payment/google-ai` and send one message (paid).
-2. Open `http://localhost:3000/payment/stability-ai` and generate one image (paid).
-3. Open `http://localhost:3000/payment/cloudflare` and deploy a ZIP (paid).
-4. Run the agent script and show it pays for each step automatically.
-
 ## Requirements
 
 - Node.js (>= v20)
@@ -171,6 +160,16 @@ Visit: `http://localhost:3000`
 - Google AI chat UI: `http://localhost:3000/payment/google-ai`
 - Stability AI image UI: `http://localhost:3000/payment/stability-ai`
 
+**Default Cloudflare Template:**
+The system includes a professional pre-built template (`packages/nextjs/samples/cloudflare/index.js`) featuring:
+- **Elegant Fashion** - A premium clothing store website
+- Modern responsive design with Tailwind CSS
+- Product showcase with featured collections
+- Customer benefits section (free shipping, secure payment, easy returns)
+- Professional animations and glass morphism effects
+- Mobile-friendly layout
+- Under 5 KB (well under Cloudflare's 3 MB limit)
+
 ### Dashboard
 
 View your usage statistics and resource history at `http://localhost:3000/dashboard`
@@ -199,18 +198,104 @@ Run the demo:
 ```bash
 cd packages/nextjs
 export EVM_PRIVATE_KEY=0x...  # Agent's wallet private key
-./agents/scripts/run-agent-demo.sh "Landing page for a coffee shop"
+./agents/scripts/run-agent-demo.sh "YOUR_BUSINESS_DESCRIPTION"
 ```
 
 The script simulates an agent workflow:
 1. **Generate hero image** (Stability AI) - pays $0.15 USDC
-2. **Generate HTML content** (Google AI) - pays $0.1 USDC  
-3. **Inject image into HTML** (local processing)
-4. **Deploy to Cloudflare Workers** - pays $0.05 USDC
+2. **Generate about image** (Stability AI) - pays $0.15 USDC
+3. **Generate HTML content** (Google AI) - pays $0.1 USDC  
+4. **Inject images into HTML** (local processing)
+5. **Deploy to Cloudflare Workers** - pays $0.05 USDC
 
-**Total cost:** $0.3 USDC per deployment
+**Total cost:** $0.45 USDC per deployment
 
-For detailed documentation, see [agents/scripts/AGENT_DEMO_README.md](packages/nextjs/agents/scripts/AGENT_DEMO_README.md)
+**Example Prompts for Hackathon Demo:**
+
+```bash
+# Fashion & Retail
+./agents/scripts/run-agent-demo.sh "Premium Clothing Store - Fall Winter Collection"
+./agents/scripts/run-agent-demo.sh "Luxury Watch Boutique - Swiss Timepieces"
+./agents/scripts/run-agent-demo.sh "Artisan Coffee Roastery - Single Origin Beans"
+
+# Food & Dining
+./agents/scripts/run-agent-demo.sh "Modern Italian Restaurant - Fine Dining Experience"
+./agents/scripts/run-agent-demo.sh "Japanese Sushi Bar - Authentic Omakase"
+./agents/scripts/run-agent-demo.sh "Farm-to-Table Bistro - Organic Local Cuisine"
+
+# Services & Professional
+./agents/scripts/run-agent-demo.sh "Boutique Hotel - Luxury Accommodations Downtown"
+./agents/scripts/run-agent-demo.sh "Yoga Studio - Mindfulness and Wellness Center"
+./agents/scripts/run-agent-demo.sh "Photography Studio - Professional Portrait Services"
+
+# Creative & Tech
+./agents/scripts/run-agent-demo.sh "Design Agency - Creative Digital Solutions"
+./agents/scripts/run-agent-demo.sh "Coworking Space - Modern Collaborative Workspace"
+```
+
+Each prompt generates a unique landing page with:
+- **2 AI-generated images**: Hero banner + About/interior shot (optimized for token efficiency)
+- **4 core sections**: Hero, About, Services/Features, Contact (concise structure)
+- **Professional styling**: Modern responsive design under 500 lines
+- **Live deployment**: Cloudflare Worker with instant URL
+
+For comprehensive agent documentation including setup, payment flow, and troubleshooting, see [agents/scripts/AGENT_DEMO_README.md](packages/nextjs/agents/scripts/AGENT_DEMO_README.md)
+
+### AI Agent (Autonomous Decision Making)
+
+We've also created an **AI agent** that uses Google AI as an orchestrator to autonomously decide which APIs to call based on natural language prompts. Unlike the scripted demo above, this agent can intelligently choose to call one, two, or all three functions depending on your request.
+
+Run the agent:
+
+```bash
+cd packages/nextjs
+export AGENT_PRIVATE_KEY=0x...  # Agent's wallet private key
+./agents/scripts/run-interactive-agent.sh
+```
+
+The agent will enter an interactive mode where you can type natural language prompts. The AI will autonomously decide which paid APIs to call:
+
+**Example Prompts for Restaurant Websites:**
+
+```
+# Simple prompt - AI decides what to do
+Create a complete Italian restaurant website with hero images and deploy it
+
+# Detailed prompt - Full specifications
+Build a full website for a modern Italian restaurant called "La Dolce Vita" - fine dining experience. Generate hero images, create elegant HTML content, and deploy to Cloudflare
+
+# Quick test
+Create a sushi restaurant website with images and deploy it
+```
+
+**Other Business Examples:**
+
+```
+# Retail Store
+Build a luxury watch boutique website with elegant product showcases and deploy it
+
+# Coffee Shop  
+Generate a modern coffee shop landing page with artisan roastery vibes and images
+
+# Services
+Create a yoga studio website with calming imagery and wellness focus
+
+# Tech Business
+Deploy a coworking space website with modern collaborative workspace design
+```
+
+**How It Works:**
+1. You input a natural language prompt
+2. Google AI analyzes your request and decides which tools to call:
+   - `generateImage` - For creating visual assets ($0.15 each)
+   - `generateContent` - For creating HTML/text content ($0.1)
+   - `deployWebsite` - For deploying to Cloudflare Workers ($0.05)
+3. The agent autonomously executes the chosen functions and pays for each API call
+4. You receive the final result (deployed website URL or generated assets)
+5. Type `exit` to quit the interactive session
+
+
+This demonstrates true **autonomous agentic payments** - the AI decides what services to use and pays for them automatically without human intervention.
 
 ## Testing the System
 

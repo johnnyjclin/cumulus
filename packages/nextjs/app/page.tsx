@@ -10,7 +10,7 @@ import {
   RocketLaunchIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import { GOOGLE_AI_API_AMOUNT, STABILITY_API_AMOUNT } from "~~/constants";
+import { CLOUDFLARE_WORKER_API_AMOUNT, GOOGLE_AI_API_AMOUNT, STABILITY_API_AMOUNT } from "~~/constants";
 
 const Home: NextPage = () => {
   return (
@@ -133,7 +133,7 @@ const Home: NextPage = () => {
                   <CloudArrowUpIcon className="h-12 w-12 text-primary mb-3" />
                   <h3 className="card-title">Cloudflare Workers</h3>
                   <p className="text-base-content/70 mb-3">Deploy serverless functions to the edge in seconds</p>
-                  <div className="badge badge-primary badge-lg">${STABILITY_API_AMOUNT} per deploy</div>
+                  <div className="badge badge-primary badge-lg">${CLOUDFLARE_WORKER_API_AMOUNT} per deploy</div>
                 </div>
               </div>
 

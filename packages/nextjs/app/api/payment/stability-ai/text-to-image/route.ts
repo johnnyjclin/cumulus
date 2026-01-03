@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { STABILITY_API_AMOUNT } from "~~/constants";
 import { checkUserBudget, recordPaymentOnChain } from "~~/utils/budgetManager";
 import { extractPaymentInfo } from "~~/utils/paymentHelpers";
 import { recordPayment } from "~~/utils/receiptManager";
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
 
     // Check on-chain budget before processing
     try {
-      const budgetCheck = await checkUserBudget(paymentInfo.walletAddress, "$0.15");
+      const budgetCheck = await checkUserBudget(paymentInfo.walletAddress, `$${STABILITY_API_AMOUNT}`);
       if (!budgetCheck.allowed) {
         return NextResponse.json(
           {
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
               limit: budgetCheck.limit,
               remaining: budgetCheck.remaining,
               utilization: budgetCheck.utilization,
-              requestedAmount: "0.15",
+              requestedAmount: STABILITY_API_AMOUNT,
             },
           },
           { status: 402 },
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
     // Reference: https://platform.stability.ai/docs/api-reference#tag/Generate/paths/~1v2beta~1stable-image~1generate~1sd3/post
     const formData = new FormData();
     formData.append("prompt", prompt);
-    formData.append("output_format", "png");
+    formData.append("output_format", "jpeg"); // Changed from png to jpeg for smaller file size
     formData.append("aspect_ratio", aspectRatio);
     if (model === "sd3-medium") {
       formData.append("model", "sd3-medium");
@@ -97,12 +98,12 @@ export async function POST(request: Request) {
     const responseTime = Date.now() - startTime;
 
     // Record payment receipt to database with image data
-    const imageDataUrl = `data:image/png;base64,${base64Image}`;
+    const imageDataUrl = `data:image/jpeg;base64,${base64Image}`; // Changed to jpeg
 
     await recordPayment({
       txHash: paymentInfo.txHash,
       walletAddress: paymentInfo.walletAddress,
-      amount: "$0.15",
+      amount: `$${STABILITY_API_AMOUNT}`,
       resource: "/api/payment/stability-ai/text-to-image",
       description: "Stability AI Text-to-Image Generation",
       network: process.env.NETWORK || "base-sepolia",
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
         response: {
           imageDataUrl: imageDataUrl,
           imageSize: imageBuffer.byteLength,
-          format: "png",
+          format: "jpeg", // Changed to jpeg
         },
         imageGeneration: {
           prompt: prompt,
@@ -127,7 +128,7 @@ export async function POST(request: Request) {
 
     // Record payment on-chain to BudgetManager contract
     try {
-      const onChainResult = await recordPaymentOnChain(paymentInfo.walletAddress, "0.15");
+      const onChainResult = await recordPaymentOnChain(paymentInfo.walletAddress, STABILITY_API_AMOUNT);
       if (!onChainResult.success) {
         console.warn("Failed to record payment on-chain:", onChainResult.error);
       } else {
@@ -144,7 +145,7 @@ export async function POST(request: Request) {
       model: model,
       receipt: {
         txHash: paymentInfo.txHash,
-        amount: "$0.15",
+        amount: `$${STABILITY_API_AMOUNT}`,
         timestamp: new Date().toISOString(),
       },
     });

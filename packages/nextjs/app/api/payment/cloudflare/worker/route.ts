@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import JSZip from "jszip";
-import { CLOUDFLARE_WORKER_API_AMOUNT, STABILITY_API_AMOUNT } from "~~/constants";
+import { CLOUDFLARE_WORKER_API_AMOUNT } from "~~/constants";
 import { checkUserBudget, recordPaymentOnChain } from "~~/utils/budgetManager";
 import { extractPaymentInfo } from "~~/utils/paymentHelpers";
 import { recordPayment } from "~~/utils/receiptManager";
@@ -184,7 +184,7 @@ export async function POST(request: Request) {
 
     // Record payment on-chain to BudgetManager contract
     try {
-      const onChainResult = await recordPaymentOnChain(paymentInfo.walletAddress, STABILITY_API_AMOUNT);
+      const onChainResult = await recordPaymentOnChain(paymentInfo.walletAddress, CLOUDFLARE_WORKER_API_AMOUNT);
       if (!onChainResult.success) {
         console.warn("Failed to record payment on-chain:", onChainResult.error);
       } else {

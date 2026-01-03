@@ -6,11 +6,11 @@
 set -e
 
 # Check required environment variables
-if [ -z "$EVM_PRIVATE_KEY" ]; then
-  echo "❌ Error: EVM_PRIVATE_KEY is not set"
+if [ -z "$AGENT_PRIVATE_KEY" ]; then
+  echo "❌ Error: AGENT_PRIVATE_KEY is not set"
   echo ""
   echo "Please set your private key:"
-  echo "  export EVM_PRIVATE_KEY=0x..."
+  echo "  export AGENT_PRIVATE_KEY=0x..."
   echo ""
   echo "⚠️  WARNING: Never commit your private key to git!"
   exit 1
@@ -29,8 +29,8 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # Execute Agent
-PROJECT_DESC=${1:-"AI-powered landing page builder"}
+PROJECT_DESC=${1:-"Modern Italian Restaurant - Fine Dining Experience"}
 echo "📋 Project: $PROJECT_DESC"
 echo ""
 
-yarn tsx scripts/agent-demo.ts "$PROJECT_DESC"
+yarn tsx agents/scripts/agent-demo.ts "$PROJECT_DESC"
